@@ -1,0 +1,6 @@
+name = "build-together-2024"
+pages_build_output_dir = "/dist"
+compatibility_date = "2024-02-04"
+
+[env.production]
+compatibility_date = "2024-02-04"
