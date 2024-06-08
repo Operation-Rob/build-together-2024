@@ -1,0 +1,62 @@
+#+title: Bland AI Documentation
+
+https://www.bland.ai/
+
+* Sending A Call
+#+begin_src javascript
+const options = {
+  method: 'POST',
+  headers: {authorization: '<authorization>', 'Content-Type': 'application/json'},
+  body: '{"phone_number":"<string>","task":"<string>","pathway_id":"<string>","start_node_id":"<string>","voice":"<string>","first_sentence":"<string>","wait_for_greeting":true,"block_interruptions":true,"interruption_threshold":123,"model":"<string>","temperature":123,"keywords":["<string>"],"pronunciation_guide":[{}],"transfer_phone_number":"<string>","transfer_list":{},"language":"<string>","calendly":{},"timezone":"<string>","request_data":{},"tools":[{}],"dynamic_data":[{"dynamic_data[i].response_data":[{}]}],"start_time":"<string>","voicemail_message":"<string>","voicemail_action":{},"max_duration":123,"record":true,"from":"<string>","webhook":"<string>","metadata":{},"summary_prompt":"<string>","analysis_prompt":"<string>","analysis_schema":{},"answered_by_enabled":true}'
+};
+
+fetch('https://api.bland.ai/v1/calls', options)
+  .then(response => response.json())
+  .then(response => console.log(response))
+  .catch(err => console.error(err));
+#+end_src
+Our function to call this will only take the phone_number and the task as input.
+** Headers:
+- Authorization: My API Key
+- Content-Type: Application;
+** Body:
+- phone_number: we call this number. (This will be input to the function.)
+- task: we tell the AI exactly what we want it to do. Must provide examples of conversation.
+
+** Agent Parameters
+- first_sentence. We can prescribe the first sentence the AI says.
+- Interruption_threshold: (default:100), determines how eratic the caller is.
+- temperature: a measure of randomness for the AI. We want more random.
+- **record**: we want to record the phone call (set to True). It will be sent through the recording_url field in the call details of the webhook.
+- **webhook**: when the call ends, call details will be sent (POST) request to the URL we specify here. (Input 'string').
+
+* Analyse call with AI
+We can analyse our call using the same AI, by parsing the call ID of our previous call.
+#+begin_src javascript
+const options = {
+  method: 'POST',
+  headers: {authorization: '<authorization>', 'Content-Type': 'application/json'},
+  body: '{"goal":"<string>","questions":[["<string>"]]}'
+};
+
+fetch('https://api.bland.ai/v1/calls/{call_id}/analyze', options)
+  .then(response => response.json())
+  .then(response => console.log(response))
+  .catch(err => console.error(err));
+#+end_src
+
+** Headers
+- authorization: API-key.
+** Body
+- goal: what is the purpose of the call. Why did this person call us. (They are having an emergency and need help. This should be descriptive.)
+- questions: an array of strings. Each array should contain 2 elements, the question text and the epected answer type.
+Ex.
+#+begin_src javascript
+"questions": [
+      ["Who answered the call?", "human or voicemail"],
+      ["Positive feedback about the product: ", "string"],
+      ["Negative feedback about the product: ", "string"],
+      ["Customer confirmed they were satisfied", "boolean"]
+  ]
+#+end_src
+We will prescribe what these things are.
