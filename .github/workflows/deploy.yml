@@ -27,7 +27,7 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22
         script: |
-          rm -rf /root/lichenviewer
+          rm -rf /root/buildtogether
 
     - name: Copy project files
       uses: appleboy/scp-action@master
@@ -37,7 +37,7 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22
         source: "."
-        target: "/root/lichenviewer"
+        target: "/root/buildtogether"
 
     - name: Deploy using Docker Compose
       uses: appleboy/ssh-action@master
@@ -47,7 +47,7 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22
         script: |
-          cd /root/lichenviewer
+          cd /root/buildtogether
           docker compose down
           docker compose -f docker-compose.prod.yml up -d --build
           docker image prune -a --filter "until=24h" --force
