@@ -20,17 +20,19 @@ import { z } from 'zod';
 
 import { useSubmit } from '@remix-run/react';
 
-import type { ActionFunction } from '@remix-run/cloudflare';
-import { json } from '@remix-run/cloudflare';
+import type { ActionFunction, TypedResponse } from '@remix-run/cloudflare';
+import { redirect } from '@remix-run/cloudflare';
 import { makeCall } from '~/components/Call';
 
-export const action: ActionFunction = async ({ request }) => {
+export const action: ActionFunction = async ({ request }): Promise<TypedResponse<{ response: { callId: string; }; }>> => {
 	const formData = await request.formData();
 	const submittedData = Object.fromEntries(formData.entries());
 	const task = tasks[submittedData.persona.toString()];
 
 	const callId = await makeCall(submittedData.phoneNumber.toString(), task);
-	return json({ callId });
+
+  return redirect(`/calls/${callId}`);
+	
 };
 
 const formSchema = z.object({
@@ -47,21 +49,23 @@ export default function Index() {
 	const form = useForm<FormSchema, unknown, FormSchema>({
 		resolver: zodResolver(formSchema),
 	});
-
+  
 	const submit = useSubmit();
 
-	const onSubmit: SubmitHandler<z.output<typeof formSchema>> = data => {
+
+
+  const onSubmit: SubmitHandler<z.output<typeof formSchema>> = async data => {
 		console.log({ data });
 		const formData = new FormData();
 		formData.append('phoneNumber', data.phoneNumber);
 		formData.append('persona', data.persona);
-		submit(formData, { method: 'post', navigate: false });
+		await submit(formData, { method: 'post' });
 	};
 
 	return (
-		<div className="grid h-screen grid-cols-2">
-			<div className="m-9 h-full ">
-				<h1 className="scroll-m-20 text-4xl  tracking-tight lg:text-5xl">
+		<div className="grid h-screen grid-cols-1 grid-rows-2 overflow-hidden">
+			<div className="m-9">
+      <h1 className="text-4xl lg:text-5xl tracking-tight">
 					Start your Simulation 🚑
 				</h1>
 				<p className="my-6 leading-7 ">
@@ -110,9 +114,7 @@ export default function Index() {
 					<Button type="submit">Submit</Button>
 				</form>
 			</div>
-			<div className="h-full border-4 border-indigo-500/100">
-				<Map />
-			</div>
+
 		</div>
 	);
 }

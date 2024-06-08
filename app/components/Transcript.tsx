@@ -18,7 +18,10 @@ const Transcript = ({ callId }: TranscriptProps) => {
         const data = response.data;
 
         if (data && data.transcripts) {
-          const conversation = data.transcripts.map((item: { user: string; text: string; }) => `${item.user}: ${item.text}`).join('\n');
+          const conversation = data?.transcripts?.map((item: { user: string; text: string; }) => ({
+            user: item.user,
+            text: item.text,
+          })) ?? [];
           setMessages(conversation);
         }
 
@@ -26,7 +29,7 @@ const Transcript = ({ callId }: TranscriptProps) => {
           setTimeout(pollForCompletion, 2000); // Re-poll if not completed
         } else {
           setLoading(false); // Stop loading when completed
-        }
+        } 
       } catch (error) {
         console.error('Failed to fetch transcript:', error);
         setError('Failed to fetch transcript');
@@ -38,6 +41,7 @@ const Transcript = ({ callId }: TranscriptProps) => {
   }, [callId]);
 
   return (
+    <>
     <div className="max-w-lg mx-auto">
       <h2 className="text-2xl font-bold mb-4">Transcript</h2>
       {loading && <p className="text-gray-500">Loading transcript...</p>}
@@ -58,6 +62,8 @@ const Transcript = ({ callId }: TranscriptProps) => {
         </div>
       )}
     </div>
+
+    </>
   );
 };
 export default Transcript;
