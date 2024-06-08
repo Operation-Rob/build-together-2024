@@ -42,28 +42,28 @@ const Transcript = ({ callId }: TranscriptProps) => {
 
   return (
     <>
-    <div className="max-w-lg mx-auto">
-      <h2 className="text-2xl font-bold mb-4">Transcript</h2>
-      {loading && <p className="text-gray-500">Loading transcript...</p>}
-      {error && <p className="text-red-500">Error: {error}</p>}
-      {messages.length > 0 && (
-        <div className="space-y-4">
-          {messages.map((message, index) => (
-            <div
-              key={index}
-              className={`p-4 rounded-lg ${
-                message.user === 'User' ? 'bg-blue-500 text-white' : 'bg-gray-200'
-              }`}
-            >
-              <p className="font-bold">{message.user}</p>
-              <p>{message.text}</p>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-
+      <div className="max-w-lg mx-auto">
+        <h2 className="text-2xl font-bold mb-4 text-center mt-3">Transcript</h2>
+        {!messages.length && <p className="text-gray-500 text-center">Loading transcript...</p>}
+        {error && <p className="text-red-500 text-center">Error: {error}</p>}
+        {messages.length > 0 && (
+          <div className="space-y-4">
+            {messages.map((message, index) => (
+              <div
+                key={index}
+                className={`px-4 py-2 mx-auto max-w-full w-4/5 rounded-lg ${
+                  message.user === 'User' ? 'bg-blue-500 text-white' : 'bg-gray-200'
+                }`}
+              >
+                <p className="font-bold">{message.user === 'user' ? 'Emergency Dispatcher' : 'Caller'}</p>
+                <p>{message.text}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </>
   );
 };
+
 export default Transcript;

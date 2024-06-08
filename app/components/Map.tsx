@@ -156,9 +156,7 @@ const Map = ({ renderAmbulance }) => {
 			});
             
 			map.on('load', async () => {
-                addImage('hospital.png', map, [115.82244, -31.940643], 'myHospital', 0.15);
-    
-                
+                addImage('/hospital.png', map, [115.82244, -31.940643], 'myHospital', 0.15);
 			});
 
 			map.on('move', () => {
@@ -182,20 +180,23 @@ const Map = ({ renderAmbulance }) => {
 
     useEffect(() => {
         const fetchRoute = async () => {
-            const query = await fetch(`route1.json`, { method: 'GET' });
+            console.clear();
+            console.log('Fetching route...');
+            const query = await fetch(`/route1.json`, { method: 'GET' });
             const json = await query.json();
             return json.routes[0].geometry; // Assuming first route and its geometry
         };
 
         const initiateAnimation = async () => {
-            if (renderAmbulance && map) {
+            if (renderAmbulance && map && !hasRendered) {
+                setHasRendered(true);
                 console.log('Rendering ambulance...');
                 setHasRendered(true);
                 const route = await fetchRoute();
                 
                 setRoute(route.coordinates);
                 setTimeout(async () => {
-                    addImage('ambulance.png', map, [115.81244, -31.930643], 'ambulance', 0.02);
+                    addImage('/ambulance.png', map, [115.81244, -31.930643], 'ambulance', 0.02);
                     setRoute(route.coordinates);
                     await addRoute(map, route, 1);
                     animateRoute(map, 'ambulance', route.coordinates, 40000);

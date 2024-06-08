@@ -26,15 +26,16 @@ import type { ActionFunction, TypedResponse } from '@remix-run/cloudflare';
 import { redirect } from '@remix-run/cloudflare';
 import { makeCall } from '~/components/Call';
 
-export const action: ActionFunction = async ({ request }): Promise<TypedResponse<{ response: { callId: string; }; }>> => {
+export const action: ActionFunction = async ({
+	request,
+}): Promise<TypedResponse<{ response: { callId: string } }>> => {
 	const formData = await request.formData();
 	const submittedData = Object.fromEntries(formData.entries());
 	const task = tasks[submittedData.persona.toString()];
 
 	const callId = await makeCall(submittedData.phoneNumber.toString(), task);
 
-  return redirect(`/calls/${callId}`);
-	
+	return redirect(`/calls/${callId}`);
 };
 
 const formSchema = z.object({
@@ -48,52 +49,24 @@ const formSchema = z.object({
 type FormSchema = z.infer<typeof formSchema>;
 
 export default function Index() {
-	// const form = useForm();
-	const [timer, setTimer] = useState(0);
-	const [timerActive, setTimerActive] = useState(false);
-
-	const [renderAmbulance, setRenderAmbulance] = useState(false);
-
-	const [_, setCountry] = useState<Country>();
-	const [phoneNumber, setPhoneNumber] = useState('');
 	const form = useForm<FormSchema, unknown, FormSchema>({
 		resolver: zodResolver(formSchema),
 	});
-  
+
 	const submit = useSubmit();
 
-
-
-  const onSubmit: SubmitHandler<z.output<typeof formSchema>> = async data => {
+	const onSubmit: SubmitHandler<z.output<typeof formSchema>> = async data => {
 		console.log({ data });
 		const formData = new FormData();
 		formData.append('phoneNumber', data.phoneNumber);
 		formData.append('persona', data.persona);
 		submit(formData, { method: 'post', navigate: false });
-		setRenderAmbulance(true);
-		setTimerActive(true);
 	};
-
-	useEffect(() => {
-		let interval;
-		if (timerActive) {
-			interval = setInterval(() => {
-				setTimer(prevTimer => prevTimer + 0.1);
-			}, 100);
-		}
-		return () => clearInterval(interval);
-	}, [timerActive]);
-
-	useEffect(() => {
-		if (!timerActive) {
-			setTimer(0);
-		}
-	}, [timerActive]);
 
 	return (
 		<div className="grid h-screen grid-cols-1 grid-rows-2 overflow-hidden">
 			<div className="m-9">
-      <h1 className="text-4xl lg:text-5xl tracking-tight">
+				<h1 className="text-4xl tracking-tight lg:text-5xl">
 					Start your Simulation 🚑
 				</h1>
 				<p className="my-6 leading-7 ">
@@ -140,11 +113,7 @@ export default function Index() {
 						/>
 					</div>
 					<Button type="submit">Submit</Button>
-					{timerActive && <div>Timer: {timer.toFixed(2)} seconds</div>}
 				</form>
-			</div>
-			<div className="h-full border-4 border-indigo-500/100">
-				<Map renderAmbulance={renderAmbulance} />
 			</div>
 		</div>
 	);
