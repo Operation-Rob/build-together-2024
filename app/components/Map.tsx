@@ -133,7 +133,7 @@ const animateRoute = (map, name, route, totalDuration) => {
     nextSegment(); // Start the first segment
 }
 
-const Map = () => {
+const Map = ({ renderAmbulance }) => {
 	mapboxgl.accessToken = "pk.eyJ1IjoibW5lZmZmIiwiYSI6ImNseDVrY25pYTFjdjgyanF1eWN3ODk1dnYifQ.C3FcclLbADYg41XId7M5AA";
 
 	const mapContainer = useRef(null);
@@ -192,14 +192,14 @@ const Map = () => {
                 console.log('Rendering ambulance...');
                 setHasRendered(true);
                 const route = await fetchRoute();
-                await addRoute(map, route, 1);
                 
                 setRoute(route.coordinates);
-                setTimeout(() => {
+                setTimeout(async () => {
                     addImage('ambulance.png', map, [115.81244, -31.930643], 'ambulance', 0.02);
                     setRoute(route.coordinates);
+                    await addRoute(map, route, 1);
                     animateRoute(map, 'ambulance', route.coordinates, 40000);
-                }, 1000);
+                }, 30000);
             }
         };
     
