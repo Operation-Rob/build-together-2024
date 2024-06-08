@@ -1,3 +1,5 @@
+import type { LoaderFunctionArgs } from '@remix-run/cloudflare';
+import { json, useLoaderData } from '@remix-run/react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import type { Country } from 'react-phone-number-input';
@@ -5,18 +7,15 @@ import type { Country } from 'react-phone-number-input';
 import Map from '~/components/Map';
 
 import { Button } from '~/components/ui/button';
-
 import { PhoneInput } from '~/components/ui/phone-inputs';
-import {
-	Select,
-	SelectContent,
-	SelectGroup,
-	SelectItem,
-	SelectLabel,
-	SelectTrigger,
-	SelectValue,
-} from '~/components/ui/select';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectLabel, SelectItem } from '~/components/ui/select';
 import { tasks } from '~/lib/task';
+
+export async function loader({ context }: LoaderFunctionArgs) {
+	return json({
+		content: { hello: 'world' },
+	});
+}
 
 export default function Index() {
 	const form = useForm();
