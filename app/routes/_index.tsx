@@ -1,27 +1,56 @@
-import type { LoaderFunctionArgs } from '@remix-run/cloudflare';
-import { json, useLoaderData } from '@remix-run/react';
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import type { Country } from 'react-phone-number-input';
-
-import Map from '~/components/Map';
-
+import type { SubmitHandler } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
+import { isValidPhoneNumber } from 'react-phone-number-input';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '~/components/ui/button';
+import Map from '~/components/Map';
 import { PhoneInput } from '~/components/ui/phone-inputs';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectLabel, SelectItem } from '~/components/ui/select';
+import {
+	Select,
+	SelectTrigger,
+	SelectValue,
+	SelectContent,
+	SelectGroup,
+	SelectLabel,
+	SelectItem,
+} from '~/components/ui/select';
 import { tasks } from '~/lib/task';
+import { z } from 'zod';
+import { ActionFunction, json } from '@remix-run/cloudflare';
+import { useTransition } from 'react';
+import { useActionData, useSubmit } from '@remix-run/react';
 
-export async function loader({ context }: LoaderFunctionArgs) {
-	return json({
-		content: { hello: 'world' },
-	});
-}
+const formSchema = z.object({
+	phoneNumber: z
+		.string()
+		.refine(isValidPhoneNumber, { message: 'Invalid phone number' })
+		.or(z.literal('')),
+	persona: z.string(),
+});
+
+export const action: ActionFunction = async ({ request }) => {
+	console.log({ request });
+	// Process form data and perform necessary actions
+	return json({ success: true });
+};
+
+type FormSchema = z.infer<typeof formSchema>;
 
 export default function Index() {
-	const form = useForm();
-	const onSubmit = () => {};
-	const [_, setCountry] = useState<Country>();
-	const [phoneNumber, setPhoneNumber] = useState('');
+	const form = useForm<FormSchema, unknown, FormSchema>({
+		resolver: zodResolver(formSchema),
+	});
+
+	const actionData = useActionData();
+	const transition = useTransition();
+	const submit = useSubmit();
+
+	const onSubmit: SubmitHandler<z.output<typeof formSchema>> = data => {
+		submit(data);
+	};
+
+	const isSubmitting =
+		transition.state === 'loading' || transition.state === 'submitting';
 
 	return (
 		<div className="grid h-screen grid-cols-2">
@@ -39,38 +68,47 @@ export default function Index() {
 					className="flex flex-col items-start space-y-8"
 				>
 					<div className="grid grid-cols-2 gap-5">
-						<PhoneInput
+						<Controller
+							control={form.control}
 							name="phoneNumber"
-							value={phoneNumber}
-							onChange={v => setPhoneNumber(v?.toString() ?? '')}
-							onCountryChange={setCountry}
-							placeholder="Enter a phone number"
+							render={({ field }) => {
+								return (
+									<PhoneInput {...field} placeholder="Enter a phone number" />
+								);
+							}}
 						/>
-						<Select name="persona">
-							<SelectTrigger className="w-[180px]">
-								<SelectValue placeholder="Select a persona" />
-							</SelectTrigger>
-							<SelectContent>
-								<SelectGroup>
-									<SelectLabel>Select a persona</SelectLabel>
-									{Object.entries(tasks).map(([id, task]) => {
-										return (
-											<SelectItem key={id} value={id}>
-												{task.title}
-											</SelectItem>
-										);
-									})}
-								</SelectGroup>
-							</SelectContent>
-						</Select>
+						<Controller
+							name="persona"
+							control={form.control}
+							render={({ field }) => (
+								<Select onValueChange={field.onChange} value={field.value}>
+									<SelectTrigger className="w-[180px]">
+										<SelectValue placeholder="Select a persona" />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectGroup>
+											<SelectLabel>Select a persona</SelectLabel>
+											{Object.entries(tasks).map(([id, task]) => {
+												return (
+													<SelectItem key={id} value={id}>
+														{task.title}
+													</SelectItem>
+												);
+											})}
+										</SelectGroup>
+									</SelectContent>
+								</Select>
+							)}
+						/>
 					</div>
 					<Button type="submit">Submit</Button>
+					{actionData && actionData.success && (
+						<p>Form submitted successfully!</p>
+					)}
 				</form>
 			</div>
 			<div className="h-full border-4 border-indigo-500/100">
 				<Map />
-
-
 			</div>
 		</div>
 	);
