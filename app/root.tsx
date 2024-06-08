@@ -1,9 +1,3 @@
-import type {
-	LinksFunction,
-	LoaderFunctionArgs,
-	MetaFunction,
-} from '@remix-run/cloudflare';
-import * as React from 'react';
 import {
 	Links,
 	Meta,
@@ -11,100 +5,67 @@ import {
 	Scripts,
 	ScrollRestoration,
 	isRouteErrorResponse,
-	json,
-	useLoaderData,
 	useRouteError,
 } from '@remix-run/react';
-import stylesUrl from '~/styles.css?url';
-import { type Menu, ErrorLayout, Layout } from './layout';
 
-export const links: LinksFunction = () => {
-	return [{ rel: 'stylesheet', href: stylesUrl }];
-};
+import { GlobalPendingIndicator } from '~/components/global-pending-indicator';
 
-export const meta: MetaFunction = () => {
-	return [
-		{ charset: 'utf-8' },
-		{ name: 'viewport', content: 'width=device-width, initial-scale=1' },
-		{ title: 'remix-cloudlfare-template' },
-	];
-};
+import {
+	ThemeSwitcherSafeHTML,
+	ThemeSwitcherScript,
+} from '~/components/theme-switcher';
 
-export function loader({ context }: LoaderFunctionArgs) {
-	const menus = [] as Menu[];
-	return json({ menus });
-}
+import './globals.css';
 
-export default function App() {
-	const { menus } = useLoaderData<typeof loader>();
-
+function App({ children }: { children: React.ReactNode }) {
 	return (
-		<Document>
-			<Layout menus={menus}>
-				<Outlet />
-			</Layout>
-		</Document>
-	);
-}
-
-function Document({
-	children,
-	title,
-}: {
-	children: React.ReactNode;
-	title?: string;
-}) {
-	return (
-		<html lang="en">
+		<ThemeSwitcherSafeHTML lang="en">
 			<head>
 				<meta charSet="utf-8" />
-				{title ? <title>{title}</title> : null}
+				<meta name="viewport" content="width=device-width, initial-scale=1" />
 				<Meta />
 				<Links />
+				<ThemeSwitcherScript />
 			</head>
 			<body>
+				<GlobalPendingIndicator />
 				{children}
 				<ScrollRestoration />
 				<Scripts />
 			</body>
-		</html>
+		</ThemeSwitcherSafeHTML>
+	);
+}
+
+export default function Root() {
+	return (
+		<App>
+			<Outlet />
+		</App>
 	);
 }
 
 export function ErrorBoundary() {
 	const error = useRouteError();
-
-	// Log the error to the console
-	console.error(error);
-
+	let status = 500;
+	let message = 'An unexpected error occurred.';
 	if (isRouteErrorResponse(error)) {
-		const title = `${error.status} ${error.statusText}`;
-
-		let message;
+		status = error.status;
 		switch (error.status) {
-			case 401:
-				message =
-					'Oops! Looks like you tried to visit a page that you do not have access to.';
-				break;
 			case 404:
-				message =
-					'Oops! Looks like you tried to visit a page that does not exist.';
-				break;
-			default:
-				message = JSON.stringify(error.data, null, 2);
+				message = 'Page Not Found';
 				break;
 		}
-
-		return (
-			<Document title={title}>
-				<ErrorLayout title={title} description={message} />
-			</Document>
-		);
+	} else {
+		console.error(error);
 	}
 
 	return (
-		<Document title="Error!">
-			<ErrorLayout title="There was an error" description={`${error}`} />
-		</Document>
+		<App>
+			<div className="container prose py-8">
+				<h1>{status}</h1>
+				<p>{message}</p>
+			</div>
+		</App>
 	);
 }
