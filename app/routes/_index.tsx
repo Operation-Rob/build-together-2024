@@ -16,9 +16,21 @@ import {
 } from '~/components/ui/select';
 import { tasks } from '~/lib/task';
 import { z } from 'zod';
-import { ActionFunction, json } from '@remix-run/cloudflare';
-import { useTransition } from 'react';
-import { useActionData, useSubmit } from '@remix-run/react';
+
+import { useSubmit } from '@remix-run/react';
+
+import type { ActionFunction } from '@remix-run/cloudflare';
+import { json } from '@remix-run/cloudflare';
+import { makeCall } from '~/components/Call';
+
+export const action: ActionFunction = async ({ request }) => {
+	const formData = await request.formData();
+	const submittedData = Object.fromEntries(formData.entries());
+	const task = tasks[submittedData.persona.toString()];
+
+	const callId = await makeCall(submittedData.phoneNumber.toString(), task);
+	return json({ callId });
+};
 
 const formSchema = z.object({
 	phoneNumber: z
@@ -28,12 +40,6 @@ const formSchema = z.object({
 	persona: z.string(),
 });
 
-export const action: ActionFunction = async ({ request }) => {
-	console.log({ request });
-	// Process form data and perform necessary actions
-	return json({ success: true });
-};
-
 type FormSchema = z.infer<typeof formSchema>;
 
 export default function Index() {
@@ -41,16 +47,15 @@ export default function Index() {
 		resolver: zodResolver(formSchema),
 	});
 
-	const actionData = useActionData();
-	const transition = useTransition();
 	const submit = useSubmit();
 
 	const onSubmit: SubmitHandler<z.output<typeof formSchema>> = data => {
-		submit(data);
+		console.log({ data });
+		const formData = new FormData();
+		formData.append('phoneNumber', data.phoneNumber);
+		formData.append('persona', data.persona);
+		submit(formData, { method: 'post', navigate: false });
 	};
-
-	const isSubmitting =
-		transition.state === 'loading' || transition.state === 'submitting';
 
 	return (
 		<div className="grid h-screen grid-cols-2">
@@ -102,9 +107,6 @@ export default function Index() {
 						/>
 					</div>
 					<Button type="submit">Submit</Button>
-					{actionData && actionData.success && (
-						<p>Form submitted successfully!</p>
-					)}
 				</form>
 			</div>
 			<div className="h-full border-4 border-indigo-500/100">
