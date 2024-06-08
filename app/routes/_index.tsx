@@ -1,14 +1,24 @@
-import type { LoaderFunctionArgs } from '@remix-run/cloudflare';
-import { json, useLoaderData } from '@remix-run/react';
-
-export async function loader({ context }: LoaderFunctionArgs) {
-	return json({
-		content: { hello: 'world' },
-	});
+// File: routes/index.tsx
+import { json, LoaderFunction } from '@remix-run/node';
+import { useLoaderData } from '@remix-run/react';
+import { Link } from '@remix-run/react';
+import Call from '~/components/Call';
+interface LoaderData {
+  phoneNumber: string;
 }
 
-export default function Index() {
-	const { content } = useLoaderData<typeof loader>();
+export const loader: LoaderFunction = async (): Promise<Response> => {
+  // Simulating fetching data, e.g., a phone number
+  const phoneNumber = "+61466250468";
+  return json({ phoneNumber });
+};
 
-	return <pre>{JSON.stringify(content, null, 2)}</pre>;
+export default function Index() {
+const { phoneNumber } = useLoaderData<LoaderData>();
+
+return (
+	<div>
+		<Call phoneNumber={phoneNumber} />
+	</div>
+);
 }
