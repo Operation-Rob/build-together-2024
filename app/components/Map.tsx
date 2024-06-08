@@ -104,9 +104,6 @@ const animateMovement = (map, name, startLocation, endLocation, duration, callba
 
 
 const animateRoute = (map, name, route, totalDuration) => {
-    console.clear()
-    console.log(map);
-
     let currentSegment = 0;
     const numSegments = route.length - 1;
     const segmentLengths = [];
@@ -153,6 +150,8 @@ const Map = ({renderAmbulance}) => {
 
     const [theRoute, setRoute] = useState([]);
 
+    const [hasRendered, setHasRendered] = useState(false);
+
 	useEffect(() => {
 		if (mapContainer.current && !mapContainer.current.map) {
 			const map = new mapboxgl.Map({
@@ -163,25 +162,8 @@ const Map = ({renderAmbulance}) => {
 			});
             
 			map.on('load', async () => {
-                const routeIndex = 1;
-                const routeName = `route${routeIndex}`;
-
-                const fetchRoute = async () => {
-                    const query = await fetch(`route${routeIndex}.json`, { method: 'GET' });
-                    const json = await query.json();
-                    return json.routes[0].geometry; // Assuming first route and its geometry
-                };
-            
-                const route = await fetchRoute(); // Fetch the route asynchronously
-                setRoute(route.coordinates);
-                await addRoute(map, route, 1);
-				// addHospital(map);
                 addImage('hospital.png', map, [115.82244, -31.940643], 'myHospital', 0.15);
-                addImage('ambulance.png', map, [115.81244, -31.930643], 'ambulance', 0.02);
-
-                // setTimeout(() => {
-                //     animateRoute(map, 'ambulance', theRoute, 40000);
-                // }, 5000);
+    
                 
 			});
 
@@ -205,10 +187,30 @@ const Map = ({renderAmbulance}) => {
 	}, []); // Only depend on mapContainer ref
 
     useEffect(() => {
-        if (renderAmbulance && map && theRoute.length > 0) {
-            animateRoute(map, 'ambulance', theRoute, 40000);
-        }
-    }, [renderAmbulance, map, theRoute]);
+        const fetchRoute = async () => {
+            const query = await fetch(`route1.json`, { method: 'GET' });
+            const json = await query.json();
+            return json.routes[0].geometry; // Assuming first route and its geometry
+        };
+
+        const initiateAnimation = async () => {
+            if (renderAmbulance && map) {
+                console.log('Rendering ambulance...');
+                setHasRendered(true);
+                const route = await fetchRoute();
+                await addRoute(map, route, 1);
+                
+                setRoute(route.coordinates);
+                setTimeout(() => {
+                    addImage('ambulance.png', map, [115.81244, -31.930643], 'ambulance', 0.02);
+                    setRoute(route.coordinates);
+                    animateRoute(map, 'ambulance', route.coordinates, 40000);
+                }, 1000);
+            }
+        };
+    
+        initiateAnimation();
+    }, [renderAmbulance, map, theRoute, hasRendered]);
 
 	return (
 		<div>
