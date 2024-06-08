@@ -7,5 +7,5 @@ services:
     ports:
       - "80:80"  # Nginx by default serves on port 80
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf  # Custom Nginx config, if needed
+      - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf  # Custom Nginx config, if needed
     restart: unless-stopped
