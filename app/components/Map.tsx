@@ -121,7 +121,7 @@ const animateRoute = (map, name, route, totalDuration) => {
 }
 
 const Map = () => {
-	mapboxgl.accessToken = import.meta.env.VITE_MAPBOX;
+	mapboxgl.accessToken = "pk.eyJ1IjoibW5lZmZmIiwiYSI6ImNseDVrY25pYTFjdjgyanF1eWN3ODk1dnYifQ.C3FcclLbADYg41XId7M5AA";
 
 	const mapContainer = useRef(null);
 	const [lng, setLng] = useState(115.82244);
