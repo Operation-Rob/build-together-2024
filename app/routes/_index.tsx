@@ -2,7 +2,10 @@ import type { LoaderFunctionArgs } from '@remix-run/cloudflare';
 import { json, useLoaderData } from '@remix-run/react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Country } from 'react-phone-number-input';
+import type { Country } from 'react-phone-number-input';
+
+import Map from '~/components/Map';
+
 import { Button } from '~/components/ui/button';
 import { PhoneInput } from '~/components/ui/phone-inputs';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectLabel, SelectItem } from '~/components/ui/select';
@@ -64,7 +67,11 @@ export default function Index() {
 					<Button type="submit">Submit</Button>
 				</form>
 			</div>
-			<div className="h-full border-4 border-indigo-500/100">foo</div>
+			<div className="h-full border-4 border-indigo-500/100">
+				<Map />
+
+
+			</div>
 		</div>
 	);
 }
