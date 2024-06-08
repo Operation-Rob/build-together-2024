@@ -133,14 +133,8 @@ const animateRoute = (map, name, route, totalDuration) => {
     nextSegment(); // Start the first segment
 }
 
-// const fetchRoute = async () => {
-//     const query = await fetch(`route${routeIndex}.json`, { method: 'GET' });
-//     const json = await query.json();
-//     return json.routes[0].geometry; // Assuming first route and its geometry
-// };
-
-const Map = ({renderAmbulance}) => {
-	mapboxgl.accessToken = import.meta.env.VITE_MAPBOX;
+const Map = () => {
+	mapboxgl.accessToken = "pk.eyJ1IjoibW5lZmZmIiwiYSI6ImNseDVrY25pYTFjdjgyanF1eWN3ODk1dnYifQ.C3FcclLbADYg41XId7M5AA";
 
 	const mapContainer = useRef(null);
 	const [lng, setLng] = useState(115.82244);

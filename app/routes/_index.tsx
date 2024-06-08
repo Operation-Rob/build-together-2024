@@ -1,32 +1,68 @@
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import type { Country } from 'react-phone-number-input';
-
-import Map from '~/components/Map';
-
+import type { SubmitHandler } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
+import { isValidPhoneNumber } from 'react-phone-number-input';
+import { zodResolver } from '@hookform/resolvers/zod';
+import Transcript from '~/components/Transcript';
 import { Button } from '~/components/ui/button';
-
+import Map from '~/components/Map';
 import { PhoneInput } from '~/components/ui/phone-inputs';
 import {
 	Select,
-	SelectContent,
-	SelectGroup,
-	SelectItem,
-	SelectLabel,
 	SelectTrigger,
 	SelectValue,
+	SelectContent,
+	SelectGroup,
+	SelectLabel,
+	SelectItem,
 } from '~/components/ui/select';
 import { tasks } from '~/lib/task';
+import { z } from 'zod';
+
+import { useSubmit } from '@remix-run/react';
+
+import type { ActionFunction } from '@remix-run/cloudflare';
+import { json } from '@remix-run/cloudflare';
+import { makeCall } from '~/components/Call';
+
+export const action: ActionFunction = async ({ request }) => {
+	const formData = await request.formData();
+	const submittedData = Object.fromEntries(formData.entries());
+	const task = tasks[submittedData.persona.toString()];
+
+	const callId = await makeCall(submittedData.phoneNumber.toString(), task);
+	return json({ callId });
+};
+
+const formSchema = z.object({
+	phoneNumber: z
+		.string()
+		.refine(isValidPhoneNumber, { message: 'Invalid phone number' })
+		.or(z.literal('')),
+	persona: z.string(),
+});
+
+type FormSchema = z.infer<typeof formSchema>;
 
 export default function Index() {
 	const form = useForm();
 	const [renderAmbulance, setRenderAmbulance] = useState(false);
 
-	const onSubmit = () => {
-		setRenderAmbulance(true);
-	};
 	const [_, setCountry] = useState<Country>();
 	const [phoneNumber, setPhoneNumber] = useState('');
+	const form = useForm<FormSchema, unknown, FormSchema>({
+		resolver: zodResolver(formSchema),
+	});
+
+	const submit = useSubmit();
+
+	const onSubmit: SubmitHandler<z.output<typeof formSchema>> = data => {
+		console.log({ data });
+		const formData = new FormData();
+		formData.append('phoneNumber', data.phoneNumber);
+		formData.append('persona', data.persona);
+		submit(formData, { method: 'post', navigate: false });
+		setRenderAmbulance(true);
+	};
 
 	return (
 		<div className="grid h-screen grid-cols-2">
@@ -44,30 +80,38 @@ export default function Index() {
 					className="flex flex-col items-start space-y-8"
 				>
 					<div className="grid grid-cols-2 gap-5">
-						<PhoneInput
+						<Controller
+							control={form.control}
 							name="phoneNumber"
-							value={phoneNumber}
-							onChange={v => setPhoneNumber(v?.toString() ?? '')}
-							onCountryChange={setCountry}
-							placeholder="Enter a phone number"
+							render={({ field }) => {
+								return (
+									<PhoneInput {...field} placeholder="Enter a phone number" />
+								);
+							}}
 						/>
-						<Select name="persona">
-							<SelectTrigger className="w-[180px]">
-								<SelectValue placeholder="Select a persona" />
-							</SelectTrigger>
-							<SelectContent>
-								<SelectGroup>
-									<SelectLabel>Select a persona</SelectLabel>
-									{Object.entries(tasks).map(([id, task]) => {
-										return (
-											<SelectItem key={id} value={id}>
-												{task.title}
-											</SelectItem>
-										);
-									})}
-								</SelectGroup>
-							</SelectContent>
-						</Select>
+						<Controller
+							name="persona"
+							control={form.control}
+							render={({ field }) => (
+								<Select onValueChange={field.onChange} value={field.value}>
+									<SelectTrigger className="w-[180px]">
+										<SelectValue placeholder="Select a persona" />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectGroup>
+											<SelectLabel>Select a persona</SelectLabel>
+											{Object.entries(tasks).map(([id, task]) => {
+												return (
+													<SelectItem key={id} value={id}>
+														{task.title}
+													</SelectItem>
+												);
+											})}
+										</SelectGroup>
+									</SelectContent>
+								</Select>
+							)}
+						/>
 					</div>
 					<Button type="submit">Submit</Button>
 				</form>
