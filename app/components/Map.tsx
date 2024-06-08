@@ -106,16 +106,31 @@ const animateMovement = (map, name, startLocation, endLocation, duration, callba
 const animateRoute = (map, name, route, totalDuration) => {
     let currentSegment = 0;
     const numSegments = route.length - 1;
-    const segmentDuration = totalDuration / numSegments;
+    const segmentLengths = [];
+    let totalLength = 0;
+    
+    // calculate the length of each segment:
+    for (let i = 0; i < numSegments; i++) {
+        const length = Math.sqrt(
+            Math.pow(route[i + 1][0] - route[i][0], 2) + 
+            Math.pow(route[i + 1][1] - route[i][1], 2)
+        );
+        segmentLengths.push(length);
+        totalLength += length;
+    }
+
+    // calculate the total of all segment lengths
+    const segmentDurations = segmentLengths.map(length => (length / totalLength) * totalDuration);
 
     function nextSegment() {
         if (currentSegment < numSegments) {
-            animateMovement(map, name, route[currentSegment], route[currentSegment + 1], segmentDuration, () => {
+            animateMovement(map, name, route[currentSegment], route[currentSegment + 1], segmentDurations[currentSegment], () => {
                 currentSegment++;
                 nextSegment(); // Recursively call nextSegment after the current animation completes
             });
         }
     }
+
 
     nextSegment(); // Start the first segment
 }
@@ -154,7 +169,7 @@ const Map = () => {
                 addImage('hospital.png', map, [115.82244, -31.940643], 'myHospital', 0.15);
                 addImage('ambulance.png', map, [115.81244, -31.930643], 'ambulance', 0.02);
 
-                animateRoute(map, 'ambulance', route.coordinates, 28000);
+                animateRoute(map, 'ambulance', route.coordinates, 40000);
 			});
 
 			map.on('move', () => {
