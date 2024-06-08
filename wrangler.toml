@@ -1,6 +1,8 @@
-name = "build-together-2024"
-pages_build_output_dir = "/dist"
-compatibility_date = "2024-02-04"
+name = "build-tgether-2024"
+compatibility_date = "2024-02-11"
+kv_namespaces = [
+  { binding = "cache", id = "cache" }
+]
 
-[env.production]
-compatibility_date = "2024-02-04"
+[vars]
+
