@@ -25,11 +25,6 @@ export function Layout({
 	return (
 		<div className="mx-auto lg:container">
 			<div className="flex flex-col-reverse lg:flex-row">
-				<section className="sticky bottom-0 flex-1 lg:relative lg:bottom-auto">
-					<div className="lg:sticky lg:top-0">
-						<MainNavigation menus={menus} />
-					</div>
-				</section>
 				<main className="flex-1">
 					<div className="px-5 py-5 lg:py-10">{children}</div>
 				</main>

@@ -1,24 +1,63 @@
-// File: routes/index.tsx
-import { json, LoaderFunction } from '@remix-run/node';
-import { useLoaderData } from '@remix-run/react';
-import { Link } from '@remix-run/react';
-import Call from '~/components/Call';
-interface LoaderData {
-  phoneNumber: string;
+import type { LoaderFunctionArgs } from '@remix-run/cloudflare';
+import { json, useLoaderData } from '@remix-run/react';
+
+export async function loader({ context }: LoaderFunctionArgs) {
+	return json({
+		content: { hello: 'world' },
+	});
 }
 
-export const loader: LoaderFunction = async (): Promise<Response> => {
-  // Simulating fetching data, e.g., a phone number
-  const phoneNumber = "+61466250468";
-  return json({ phoneNumber });
-};
-
 export default function Index() {
-const { phoneNumber } = useLoaderData<LoaderData>();
+	const form = useForm();
+	const onSubmit = () => {};
+	const [_, setCountry] = useState<Country>();
+	const [phoneNumber, setPhoneNumber] = useState('');
 
-return (
-	<div>
-		<Call phoneNumber={phoneNumber} />
-	</div>
-);
+	return (
+		<div className="grid h-screen grid-cols-2">
+			<div className="m-9 h-full ">
+				<h1 className="scroll-m-20 text-4xl  tracking-tight lg:text-5xl">
+					Start your Simulation 🚑
+				</h1>
+				<p className="my-6 leading-7 ">
+					When you're ready to get started, select a persona and enter your
+					phone number below.
+				</p>
+
+				<form
+					onSubmit={form.handleSubmit(onSubmit)}
+					className="flex flex-col items-start space-y-8"
+				>
+					<div className="grid grid-cols-2 gap-5">
+						<PhoneInput
+							name="phoneNumber"
+							value={phoneNumber}
+							onChange={v => setPhoneNumber(v?.toString() ?? '')}
+							onCountryChange={setCountry}
+							placeholder="Enter a phone number"
+						/>
+						<Select name="persona">
+							<SelectTrigger className="w-[180px]">
+								<SelectValue placeholder="Select a persona" />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectGroup>
+									<SelectLabel>Select a persona</SelectLabel>
+									{Object.entries(tasks).map(([id, task]) => {
+										return (
+											<SelectItem key={id} value={id}>
+												{task.title}
+											</SelectItem>
+										);
+									})}
+								</SelectGroup>
+							</SelectContent>
+						</Select>
+					</div>
+					<Button type="submit">Submit</Button>
+				</form>
+			</div>
+			<div className="h-full border-4 border-indigo-500/100">foo</div>
+		</div>
+	);
 }
