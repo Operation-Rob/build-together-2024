@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import type { Country } from 'react-phone-number-input';
 
+import Map from '~/components/Map';
+
 import { Button } from '~/components/ui/button';
 
 import { PhoneInput } from '~/components/ui/phone-inputs';
@@ -66,7 +68,11 @@ export default function Index() {
 					<Button type="submit">Submit</Button>
 				</form>
 			</div>
-			<div className="h-full border-4 border-indigo-500/100">foo</div>
+			<div className="h-full border-4 border-indigo-500/100">
+				<Map />
+
+
+			</div>
 		</div>
 	);
 }

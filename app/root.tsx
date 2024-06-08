@@ -5,6 +5,7 @@ import {
 	ScrollRestoration,
 	isRouteErrorResponse,
 	useRouteError,
+	Outlet,
 } from '@remix-run/react';
 
 import { GlobalPendingIndicator } from '~/components/global-pending-indicator';
@@ -35,6 +36,7 @@ function App({ children }: { children: React.ReactNode }) {
 		</ThemeSwitcherSafeHTML>
 	);
 }
+
 
 export default function Root() {
 	return (
