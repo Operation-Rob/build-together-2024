@@ -7,7 +7,6 @@ import * as React from 'react';
 import {
 	Links,
 	Meta,
-	Outlet,
 	Scripts,
 	ScrollRestoration,
 	isRouteErrorResponse,
@@ -17,6 +16,9 @@ import {
 } from '@remix-run/react';
 import stylesUrl from '~/styles.css?url';
 import { type Menu, ErrorLayout, Layout } from './layout';
+
+import Form from '~/components/Form';
+import Map from '~/components/Map';
 
 export const links: LinksFunction = () => {
 	return [{ rel: 'stylesheet', href: stylesUrl }];
@@ -41,7 +43,14 @@ export default function App() {
 	return (
 		<Document>
 			<Layout menus={menus}>
-				<Outlet />
+				<div className="flex h-screen">
+					<div className="w-1/2 p-4">
+						<Form />
+					</div>
+					<div className="w-1/2 p-4">
+						<Map />
+					</div>
+				</div>
 			</Layout>
 		</Document>
 	);
