@@ -64,57 +64,61 @@ export default function Index() {
 	};
 
 	return (
-		<div className="grid h-screen grid-cols-1 grid-rows-2 overflow-hidden">
-			<div className="m-9">
-				<h1 className="text-4xl tracking-tight lg:text-5xl">
-					Start your Simulation 🚑
-				</h1>
-				<p className="my-6 leading-7 ">
-					When you're ready to get started, select a persona and enter your
-					phone number below.
-				</p>
-
-				<form
-					onSubmit={form.handleSubmit(onSubmit)}
-					className="flex flex-col items-start space-y-8"
-				>
-					<div className="grid grid-cols-2 gap-5">
-						<Controller
-							control={form.control}
-							name="phoneNumber"
-							render={({ field }) => {
-								return (
-									<PhoneInput {...field} placeholder="Enter a phone number" />
-								);
-							}}
-						/>
-						<Controller
-							name="persona"
-							control={form.control}
-							render={({ field }) => (
-								<Select onValueChange={field.onChange} value={field.value}>
-									<SelectTrigger className="w-[180px]">
-										<SelectValue placeholder="Select a persona" />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectGroup>
-											<SelectLabel>Select a persona</SelectLabel>
-											{Object.entries(tasks).map(([id, task]) => {
-												return (
-													<SelectItem key={id} value={id}>
-														{task.title}
-													</SelectItem>
-												);
-											})}
-										</SelectGroup>
-									</SelectContent>
-								</Select>
-							)}
-						/>
-					</div>
-					<Button type="submit">Submit</Button>
-				</form>
-			</div>
-		</div>
-	);
-}
+    <div className="grid h-screen grid-cols-1 grid-rows-2 overflow-hidden bg-gradient-to-r from-blue-500 to-purple-600">
+      <div className="m-9 flex flex-col justify-center">
+        <h1 className="text-5xl font-bold tracking-tight text-white lg:text-6xl">
+          Start your Simulation 🚑
+        </h1>
+        <p className="my-6 text-xl leading-8 text-white">
+          When you're ready to get started, select a persona and enter your phone number below.
+        </p>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col items-start space-y-8">
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <Controller
+              control={form.control}
+              name="phoneNumber"
+              render={({ field }) => {
+                return (
+                  <PhoneInput
+                    {...field}
+                    placeholder="Enter a phone number"
+                    className="w-full rounded-lg bg-white p-4 text-gray-800 shadow-md"
+                  />
+                );
+              }}
+            />
+            <Controller
+              name="persona"
+              control={form.control}
+              render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger className="h-[70px] w-full rounded-lg bg-white p-4 text-gray-800 shadow-md text-lg">
+                    <SelectValue placeholder="Select a persona" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Select a persona</SelectLabel>
+                      {Object.entries(tasks).map(([id, task]) => {
+                        return (
+                          <SelectItem key={id} value={id}>
+                            {task.title}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </div>
+          <Button
+            type="submit"
+            className="rounded-lg bg-white px-6 py-3 text-lg font-semibold text-blue-600 shadow-md transition duration-300 ease-in-out hover:bg-blue-100"
+          >
+            Submit
+          </Button>
+        </form>
+      </div>
+    </div>
+  );
+};  

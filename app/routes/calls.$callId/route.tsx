@@ -18,16 +18,18 @@ export default function Index() {
 		return () => clearInterval(interval);
 	}, []);
 
-	return (
-		<div className="grid h-screen grid-cols-2 grid-rows-2 overflow-hidden">
-			<div>{params.callId && <Transcript callId={params.callId!} />}</div>
-			<div className="h-full">
-				<Map renderAmbulance={true} />
-				<div>Timer: {timer.toFixed(2)} seconds</div>
-			</div>
-			<div>
-				<pre></pre>
-			</div>
-		</div>
-	);
+return (
+    <div className="grid h-screen grid-cols-2 grid-rows-2 overflow-hidden">
+        <div className="border-r-4 border-indigo-500 h-screen overflow-auto">
+            {params.callId && <Transcript callId={params.callId!} />}
+        </div>
+        <div className="h-full">
+            <Map renderAmbulance={true} />
+            <div>Timer: {timer.toFixed(2)} seconds</div>
+        </div>
+        <div>
+            <pre></pre>
+        </div>
+    </div>
+);
 }
