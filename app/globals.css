@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
  
+body {
+  font-family: 'Arial', sans-serif; /* Consider a more modern font */
+  line-height: 1.6;
+  background: linear-gradient(to right, #ffffff, #e6eef3); /* Subtle background gradient */
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

@@ -20,6 +20,8 @@ import { z } from 'zod';
 
 import { useSubmit } from '@remix-run/react';
 
+import { useState, useEffect } from 'react';
+
 import type { ActionFunction, TypedResponse } from '@remix-run/cloudflare';
 import { redirect } from '@remix-run/cloudflare';
 import { makeCall } from '~/components/Call';
@@ -46,6 +48,14 @@ const formSchema = z.object({
 type FormSchema = z.infer<typeof formSchema>;
 
 export default function Index() {
+	// const form = useForm();
+	const [timer, setTimer] = useState(0);
+	const [timerActive, setTimerActive] = useState(false);
+
+	const [renderAmbulance, setRenderAmbulance] = useState(false);
+
+	const [_, setCountry] = useState<Country>();
+	const [phoneNumber, setPhoneNumber] = useState('');
 	const form = useForm<FormSchema, unknown, FormSchema>({
 		resolver: zodResolver(formSchema),
 	});
@@ -59,8 +69,26 @@ export default function Index() {
 		const formData = new FormData();
 		formData.append('phoneNumber', data.phoneNumber);
 		formData.append('persona', data.persona);
-		await submit(formData, { method: 'post' });
+		submit(formData, { method: 'post', navigate: false });
+		setRenderAmbulance(true);
+		setTimerActive(true);
 	};
+
+	useEffect(() => {
+		let interval;
+		if (timerActive) {
+			interval = setInterval(() => {
+				setTimer(prevTimer => prevTimer + 0.1);
+			}, 100);
+		}
+		return () => clearInterval(interval);
+	}, [timerActive]);
+
+	useEffect(() => {
+		if (!timerActive) {
+			setTimer(0);
+		}
+	}, [timerActive]);
 
 	return (
 		<div className="grid h-screen grid-cols-1 grid-rows-2 overflow-hidden">
@@ -112,9 +140,12 @@ export default function Index() {
 						/>
 					</div>
 					<Button type="submit">Submit</Button>
+					{timerActive && <div>Timer: {timer.toFixed(2)} seconds</div>}
 				</form>
 			</div>
-
+			<div className="h-full border-4 border-indigo-500/100">
+				<Map renderAmbulance={renderAmbulance} />
+			</div>
 		</div>
 	);
 }

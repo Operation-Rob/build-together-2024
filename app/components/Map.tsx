@@ -106,27 +106,45 @@ const animateMovement = (map, name, startLocation, endLocation, duration, callba
 const animateRoute = (map, name, route, totalDuration) => {
     let currentSegment = 0;
     const numSegments = route.length - 1;
-    const segmentDuration = totalDuration / numSegments;
+    const segmentLengths = [];
+    let totalLength = 0;
+    
+    // calculate the length of each segment:
+    for (let i = 0; i < numSegments; i++) {
+        const length = Math.sqrt(
+            Math.pow(route[i + 1][0] - route[i][0], 2) + 
+            Math.pow(route[i + 1][1] - route[i][1], 2)
+        );
+        segmentLengths.push(length);
+        totalLength += length;
+    }
+
+    // calculate the total of all segment lengths
+    const segmentDurations = segmentLengths.map(length => (length / totalLength) * totalDuration);
 
     function nextSegment() {
         if (currentSegment < numSegments) {
-            animateMovement(map, name, route[currentSegment], route[currentSegment + 1], segmentDuration, () => {
+            animateMovement(map, name, route[currentSegment], route[currentSegment + 1], segmentDurations[currentSegment], () => {
                 currentSegment++;
                 nextSegment(); // Recursively call nextSegment after the current animation completes
             });
         }
     }
-
     nextSegment(); // Start the first segment
 }
 
-const Map = () => {
+const Map = ({ renderAmbulance }) => {
 	mapboxgl.accessToken = "pk.eyJ1IjoibW5lZmZmIiwiYSI6ImNseDVrY25pYTFjdjgyanF1eWN3ODk1dnYifQ.C3FcclLbADYg41XId7M5AA";
 
 	const mapContainer = useRef(null);
 	const [lng, setLng] = useState(115.82244);
 	const [lat, setLat] = useState(-31.940643);
 	const [zoom, setZoom] = useState(13);
+    const [map, setMap] = useState(null);
+
+    const [theRoute, setRoute] = useState([]);
+
+    const [hasRendered, setHasRendered] = useState(false);
 
 	useEffect(() => {
 		if (mapContainer.current && !mapContainer.current.map) {
@@ -136,25 +154,11 @@ const Map = () => {
 				center: [lng, lat],
 				zoom: zoom,
 			});
-
+            
 			map.on('load', async () => {
-                const routeIndex = 1;
-                const routeName = `route${routeIndex}`;
-
-                const fetchRoute = async () => {
-                    const query = await fetch(`route${routeIndex}.json`, { method: 'GET' });
-                    const json = await query.json();
-                    return json.routes[0].geometry; // Assuming first route and its geometry
-                };
-            
-                const route = await fetchRoute(); // Fetch the route asynchronously
-            
-                await addRoute(map, route, 1);
-				// addHospital(map);
                 addImage('hospital.png', map, [115.82244, -31.940643], 'myHospital', 0.15);
-                addImage('ambulance.png', map, [115.81244, -31.930643], 'ambulance', 0.02);
-
-                animateRoute(map, 'ambulance', route.coordinates, 28000);
+    
+                
 			});
 
 			map.on('move', () => {
@@ -162,9 +166,11 @@ const Map = () => {
 				setLat(map.getCenter().lat.toFixed(4));
 				setZoom(map.getZoom().toFixed(2));
 			});
-
+            
 			// Save the map instance to the container to avoid reinitialization
 			mapContainer.current.map = map;
+
+            setMap(map);
 
 			// Cleanup function to remove the map instance
 			return () => {
@@ -172,7 +178,33 @@ const Map = () => {
 				mapContainer.current.map = null;
 			};
 		}
-	}, [mapContainer]); // Only depend on mapContainer ref
+	}, []); // Only depend on mapContainer ref
+
+    useEffect(() => {
+        const fetchRoute = async () => {
+            const query = await fetch(`route1.json`, { method: 'GET' });
+            const json = await query.json();
+            return json.routes[0].geometry; // Assuming first route and its geometry
+        };
+
+        const initiateAnimation = async () => {
+            if (renderAmbulance && map) {
+                console.log('Rendering ambulance...');
+                setHasRendered(true);
+                const route = await fetchRoute();
+                
+                setRoute(route.coordinates);
+                setTimeout(async () => {
+                    addImage('ambulance.png', map, [115.81244, -31.930643], 'ambulance', 0.02);
+                    setRoute(route.coordinates);
+                    await addRoute(map, route, 1);
+                    animateRoute(map, 'ambulance', route.coordinates, 40000);
+                }, 30000);
+            }
+        };
+    
+        initiateAnimation();
+    }, [renderAmbulance, map, theRoute, hasRendered]);
 
 	return (
 		<div>
