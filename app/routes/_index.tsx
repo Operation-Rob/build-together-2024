@@ -20,7 +20,11 @@ import { tasks } from '~/lib/task';
 
 export default function Index() {
 	const form = useForm();
-	const onSubmit = () => {};
+	const [renderAmbulance, setRenderAmbulance] = useState(false);
+
+	const onSubmit = () => {
+		setRenderAmbulance(true);
+	};
 	const [_, setCountry] = useState<Country>();
 	const [phoneNumber, setPhoneNumber] = useState('');
 
@@ -69,9 +73,7 @@ export default function Index() {
 				</form>
 			</div>
 			<div className="h-full border-4 border-indigo-500/100">
-				<Map />
-
-
+				<Map renderAmbulance={renderAmbulance} />
 			</div>
 		</div>
 	);
