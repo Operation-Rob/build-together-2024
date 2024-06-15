@@ -9,18 +9,18 @@ import {
 	SelectTrigger,
 	SelectValue,
 	SelectContent,
-	SelectGroup,
-	SelectLabel,
 	SelectItem,
+	SelectPopover,
 } from '~/components/ui/select';
 import { tasks } from '~/lib/task';
 import { z } from 'zod';
 
-import { useSubmit } from '@remix-run/react';
+import { useSubmit, useNavigation } from '@remix-run/react';
 
 import type { ActionFunction, TypedResponse } from '@remix-run/cloudflare';
 import { redirect } from '@remix-run/cloudflare';
 import { makeCall } from '~/components/Call';
+import { ButtonLoading } from '~/components/ui/loading-button';
 
 export const action: ActionFunction = async ({
 	request,
@@ -56,8 +56,18 @@ export default function Index() {
 		const formData = new FormData();
 		formData.append('phoneNumber', data.phoneNumber);
 		formData.append('persona', data.persona);
-		submit(formData, { method: 'post', navigate: false });
+
+		await submit(formData, { method: 'post', navigate: false });
 	};
+
+	const navigation = useNavigation();
+
+	const isLoading = navigation.state !== 'idle';
+
+	const options = Object.entries(tasks).map(([id, task]) => ({
+		name: task.title,
+		value: id,
+	}));
 
 	return (
 		<div className="grid h-screen grid-cols-1 grid-rows-2 overflow-hidden bg-gradient-to-r from-blue-500 to-purple-600">
@@ -90,33 +100,44 @@ export default function Index() {
 						<Controller
 							name="persona"
 							control={form.control}
-							render={({ field }) => (
-								<Select onValueChange={field.onChange} value={field.value}>
-									<SelectTrigger className="h-[70px] w-full rounded-lg bg-white p-4 text-lg text-gray-800 shadow-md">
-										<SelectValue placeholder="Select a persona" />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectGroup>
-											<SelectLabel>Select a persona</SelectLabel>
-											{Object.entries(tasks).map(([id, task]) => {
-												return (
-													<SelectItem key={id} value={id}>
-														{task.title}
+							render={({ field }) => {
+								return (
+									<Select
+										className="rounded-lg rounded-e-lg  bg-white p-4 text-gray-800 shadow-md"
+										placeholder="Select an item"
+										aria-label="item selection"
+										selectedKey={field.value}
+										onSelectionChange={v => {
+											return field.onChange(v);
+										}}
+									>
+										<SelectTrigger className="w-[180px]">
+											<SelectValue />
+										</SelectTrigger>
+										<SelectPopover>
+											<SelectContent aria-label="items" items={options}>
+												{item => (
+													<SelectItem id={item.value} textValue={item.name}>
+														{item.name}
 													</SelectItem>
-												);
-											})}
-										</SelectGroup>
-									</SelectContent>
-								</Select>
-							)}
+												)}
+											</SelectContent>
+										</SelectPopover>
+									</Select>
+								);
+							}}
 						/>
 					</div>
-					<Button
-						type="submit"
-						className="rounded-lg bg-white px-6 py-3 text-lg font-semibold text-blue-600 shadow-md transition duration-300 ease-in-out hover:bg-blue-100"
-					>
-						Submit
-					</Button>
+					{isLoading ? (
+						<ButtonLoading />
+					) : (
+						<Button
+							type="submit"
+							className="rounded-lg bg-white px-6 py-3 text-lg font-semibold text-blue-600 shadow-md transition duration-300 ease-in-out hover:bg-blue-100"
+						>
+							Submit
+						</Button>
+					)}
 				</form>
 			</div>
 		</div>
