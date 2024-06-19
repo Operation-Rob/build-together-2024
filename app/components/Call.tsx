@@ -24,7 +24,7 @@ export const makeCall = async (
 		record: false,
 		amd: false,
 		interruption_threshold: 200,
-		block_interruptions: True,
+		block_interruptions: true,
 		temperature: 0.3,
 		transfer_list: {},
 		metadata: {},
